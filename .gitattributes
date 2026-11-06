@@ -1,0 +1,8 @@
+# The Linux and macOS start script must use LF.
+/gradlew text eol=lf
+
+# Windows scripts must use CRLF.
+*.bat text eol=crlf
+
+# Binary files must be left untouched.
+*.jar binary
