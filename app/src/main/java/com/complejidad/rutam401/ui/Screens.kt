@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -154,11 +155,13 @@ private fun HomeScreen(viewModel: GameViewModel) {
         Spacer(Modifier.height(24.dp))
         Image(
             painter = painterResource(R.drawable.logo_universidad),
-            contentDescription = "Logo de la universidad",
-            modifier = Modifier.size(88.dp),
+            contentDescription = "Logo de la Universidad Católica de Oriente",
+            modifier = Modifier
+                .width(220.dp)
+                .height(88.dp),
         )
         Text("Carrera de observación NFC", color = AppColors.PrimaryMuted, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
-        Text("Ruta M401", color = AppColors.OnPrimary, fontSize = 56.sp, lineHeight = 60.sp, fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.app_full_name), color = AppColors.OnPrimary, fontSize = 38.sp, lineHeight = 44.sp, fontWeight = FontWeight.Bold)
         Text(
             "Escanea cada tag, responde y descubre tu siguiente destino.",
             color = AppColors.OnPrimary,
@@ -177,8 +180,8 @@ private fun HomeScreen(viewModel: GameViewModel) {
         PrimaryButton(
             text = "Empezar en M401",
             onClick = viewModel::start,
-            container = AppColors.OnPrimary,
-            contentColor = AppColors.Primary,
+            container = AppColors.Gold,
+            contentColor = AppColors.Text,
         )
         TextButton(
             onClick = viewModel::openConfig,
@@ -199,7 +202,8 @@ private fun TravelScreen(viewModel: GameViewModel, nfcStatus: NfcStatus, onOpenN
 
     ScreenColumn {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Ruta M401", modifier = Modifier.weight(1f), fontSize = 20.sp, fontWeight = FontWeight.Bold, color = AppColors.Text)
+            Text(stringResource(R.string.app_name), modifier = Modifier.weight(1f), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = AppColors.Text)
+            Spacer(Modifier.width(12.dp))
             Text("${state.visited.size} de ${CampusData.checkpoints.size} puntos", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = AppColors.TextMuted)
         }
 
@@ -454,8 +458,8 @@ private fun FinishScreen(viewModel: GameViewModel) {
         PrimaryButton(
             text = "Volver al inicio",
             onClick = viewModel::restart,
-            container = AppColors.OnPrimary,
-            contentColor = AppColors.Primary,
+            container = AppColors.Gold,
+            contentColor = AppColors.Text,
         )
     }
 }

@@ -1,4 +1,4 @@
-# Ruta M401
+# Ruta Universidad Católica de Oriente
 
 Android NFC scavenger hunt for the Complejidad Algorítmica final workshop. Players visit five
 campus checkpoints, starting and ending at M401. Correct answers keep them on the shortest route;
@@ -19,9 +19,15 @@ The APK is created at `app/build/outputs/apk/debug/app-debug.apk`.
 | What | File |
 |---|---|
 | Walking distances, detour waypoint, clues, questions | `app/src/main/java/com/complejidad/rutam401/domain/CampusData.kt` |
+
+## Branding
+
+| What | File |
+|---|---|
+| App name, short and full | `app/src/main/res/values/strings.xml` |
 | University colors | `app/src/main/java/com/complejidad/rutam401/ui/Theme.kt` |
-| Logo | `app/src/main/res/drawable/logo_universidad.xml` |
-| App icon | `app/src/main/res/drawable/ic_launcher.xml` |
+| Logo | `app/src/main/res/drawable-nodpi/logo_universidad.png` |
+| App icon | `app/src/main/res/mipmap-xxxhdpi/ic_launcher.png` |
 
 After changing the distances, update the expected values in `dijkstraFindsPathsThroughOtherPlaces`
 in `app/src/test/java/com/complejidad/rutam401/domain/RoutingTest.kt`.
