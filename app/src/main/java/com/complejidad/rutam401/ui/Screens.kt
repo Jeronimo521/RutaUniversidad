@@ -222,9 +222,6 @@ private fun TravelScreen(viewModel: GameViewModel, nfcStatus: NfcStatus, onOpenN
             Text("Siguiente destino", color = AppColors.PrimaryMuted, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
             Text(state.target.displayName, color = AppColors.OnPrimary, fontSize = 30.sp, lineHeight = 34.sp, fontWeight = FontWeight.Bold)
             Text("${state.legMeters} m", color = AppColors.PrimaryMuted, fontSize = 15.sp)
-            if (state.viaDetour) {
-                Text("Antes debes pasar por ${CampusData.DETOUR_WAYPOINT}.", color = AppColors.OnPrimary, fontSize = 15.sp, fontWeight = FontWeight.Bold)
-            }
             Text(CampusData.clues.getValue(state.target), color = AppColors.OnPrimary, fontSize = 15.sp, lineHeight = 22.sp)
         }
 
@@ -404,7 +401,12 @@ private fun ResultScreen(viewModel: GameViewModel) {
             Text("Sigues por la ruta más corta.", color = AppColors.OnPrimary, fontSize = 18.sp)
         } else {
             Text("La respuesta era: ${answered.options[answered.correctIndex]}", color = AppColors.OnPrimary, fontSize = 18.sp, lineHeight = 26.sp)
-            Text("Tu ruta aumenta +${state.penaltyMeters} m.", color = AppColors.OnPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text(
+                if (state.penaltyMeters > 0) "Ruta recalculada: +${state.penaltyMeters} m." else "Ya no hay una ruta más larga disponible desde aquí.",
+                color = AppColors.OnPrimary,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+            )
         }
         Spacer(Modifier.height(16.dp))
         Column(
@@ -418,9 +420,6 @@ private fun ResultScreen(viewModel: GameViewModel) {
             Text("Siguiente destino", color = AppColors.TextMuted, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
             Text(state.target.displayName, color = AppColors.Text, fontSize = 26.sp, lineHeight = 30.sp, fontWeight = FontWeight.Bold)
             Text("${state.legMeters} m", color = AppColors.TextMuted, fontSize = 15.sp)
-            if (state.viaDetour) {
-                Text("Antes debes pasar por ${CampusData.DETOUR_WAYPOINT}.", color = AppColors.WarningText, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
-            }
         }
         PrimaryButton(
             text = "Ver mi pista",

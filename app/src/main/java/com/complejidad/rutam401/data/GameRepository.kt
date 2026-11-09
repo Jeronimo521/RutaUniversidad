@@ -46,7 +46,6 @@ class GameRepository(context: Context) {
         put("phase", state.phase.name)
         put("target", state.target.name)
         put("legMeters", state.legMeters)
-        put("viaDetour", state.viaDetour)
         put("penaltyMeters", state.penaltyMeters)
         put("visited", JSONArray(state.visited.map { it.name }))
         put("correctCount", state.correctCount)
@@ -63,7 +62,6 @@ class GameRepository(context: Context) {
             phase = Phase.valueOf(json.getString("phase")),
             target = Place.valueOf(json.getString("target")),
             legMeters = json.getInt("legMeters"),
-            viaDetour = json.getBoolean("viaDetour"),
             penaltyMeters = json.getInt("penaltyMeters"),
             visited = List(visited.length()) { Place.valueOf(visited.getString(it)) },
             correctCount = json.getInt("correctCount"),

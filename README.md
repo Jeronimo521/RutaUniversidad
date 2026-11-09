@@ -18,7 +18,7 @@ The APK is created at `app/build/outputs/apk/debug/app-debug.apk`.
 
 | What | File |
 |---|---|
-| Walking distances, detour waypoint, clues, questions | `app/src/main/java/com/complejidad/rutam401/domain/CampusData.kt` |
+| Walking distances, clues, questions | `app/src/main/java/com/complejidad/rutam401/domain/CampusData.kt` |
 
 ## Branding
 

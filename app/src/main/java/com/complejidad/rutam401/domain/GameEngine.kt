@@ -10,7 +10,6 @@ data class GameState(
     val phase: Phase = Phase.HOME,
     val target: Place = Place.M401,
     val legMeters: Int = 0,
-    val viaDetour: Boolean = false,
     val penaltyMeters: Int = 0,
     val visited: List<Place> = emptyList(),
     val correctCount: Int = 0,
@@ -63,7 +62,6 @@ class GameEngine(
             phase = Phase.RESULT,
             target = next.target,
             legMeters = next.legMeters,
-            viaDetour = next.viaDetour,
             penaltyMeters = next.penaltyMeters,
             visited = visited,
             correctCount = state.correctCount + if (correct) 1 else 0,
@@ -90,7 +88,6 @@ class GameEngine(
             route = RouteEngine(
                 distances = Dijkstra.allPairs(CampusData.adjacencyMatrix()),
                 home = CampusData.home,
-                detourMeters = CampusData.DETOUR_METERS,
             ),
             home = CampusData.home,
             checkpoints = CampusData.checkpoints,

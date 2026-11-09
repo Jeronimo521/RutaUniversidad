@@ -38,10 +38,6 @@ object CampusData {
         Walkway(Place.PAPA_FRANCISCO, Place.INNOVAMATER, 260),
     )
 
-    // PLACEHOLDERS: replace with the real waypoint and the extra distance it adds.
-    const val DETOUR_WAYPOINT = "[Punto de desvío]"
-    const val DETOUR_METERS = 150
-
     // DRAFT: replace with real clues about each location.
     val clues = mapOf(
         Place.BIBLIOTECA to "Busca el cartel con el tag NFC en la Biblioteca.",

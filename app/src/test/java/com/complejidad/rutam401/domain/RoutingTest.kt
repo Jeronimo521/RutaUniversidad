@@ -86,13 +86,45 @@ class RoutingTest {
         }
     }
 
+    /** Walk from [from] through [remaining] in the given order, ending at M401. */
+    private fun walk(from: Place, order: List<Place>): Int =
+        (listOf(from) + order + Place.M401).zipWithNext().sumOf { (a, b) -> distance(a, b) }
+
     @Test
-    fun everyWrongAnswerAddsDistance() {
+    fun aWrongAnswerRecomputesTheLongestRouteFromWhereThePlayerIs() {
+        allAnswerSequences().forEach { answers ->
+            var state = engine.start(nowMillis = 0)
+            answers.forEach { correct ->
+                val answered = engine.answer(engine.onTagScanned(state, state.target).state, correct)
+                val remaining = CampusData.checkpoints - answered.visited.toSet()
+                if (remaining.isNotEmpty()) {
+                    // Cost of finishing the route if the next stop is `first`, best order afterwards.
+                    val costByFirst = remaining.associateWith { first ->
+                        val current = state.target
+                        distance(current, first) +
+                            permutations(remaining - first).minOf { walk(first, it) }
+                    }
+                    val best = costByFirst.values.min()
+                    val expected = if (correct) best else costByFirst.values.max()
+                    assertEquals(expected, costByFirst.getValue(answered.target))
+                    assertEquals(expected - best, answered.penaltyMeters)
+                } else {
+                    assertEquals(Place.M401, answered.target)
+                    assertEquals(0, answered.penaltyMeters)
+                }
+                state = engine.continueRoute(answered)
+            }
+        }
+    }
+
+    @Test
+    fun aWrongAnswerNeverShortensTheRoute() {
         allAnswerSequences().forEach { answers ->
             var state = engine.start(nowMillis = 0)
             answers.forEach { correct ->
                 state = engine.answer(engine.onTagScanned(state, state.target).state, correct)
-                if (correct) assertEquals(0, state.penaltyMeters) else assertTrue(state.penaltyMeters > 0)
+                assertTrue(state.penaltyMeters >= 0)
+                if (correct) assertEquals(0, state.penaltyMeters)
                 state = engine.continueRoute(state)
             }
         }
