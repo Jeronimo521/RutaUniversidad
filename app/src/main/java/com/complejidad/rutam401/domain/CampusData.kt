@@ -18,17 +18,24 @@ object CampusData {
     val home = Place.M401
     val checkpoints = Place.entries.filter { it != home }
 
-    // SAMPLE VALUES: replace with the distances measured on campus.
-    // List only the direct walking connections; Dijkstra works out every other distance.
+    // Direct walking distances measured on campus (meters), one entry per pair of places.
+    // Dijkstra may still find a shorter path through another place (e.g. M401-CONSULTORIO).
     val walkways = listOf(
-        Walkway(Place.M401, Place.BLOQUE_J, 90),
-        Walkway(Place.M401, Place.BIBLIOTECA, 120),
-        Walkway(Place.BLOQUE_J, Place.BIBLIOTECA, 150),
-        Walkway(Place.BLOQUE_J, Place.INNOVAMATER, 130),
-        Walkway(Place.BIBLIOTECA, Place.CONSULTORIO, 110),
-        Walkway(Place.BIBLIOTECA, Place.PAPA_FRANCISCO, 170),
-        Walkway(Place.CONSULTORIO, Place.PAPA_FRANCISCO, 90),
-        Walkway(Place.CONSULTORIO, Place.INNOVAMATER, 260),
+        Walkway(Place.M401, Place.BIBLIOTECA, 260),
+        Walkway(Place.M401, Place.CONSULTORIO, 441),
+        Walkway(Place.M401, Place.BLOQUE_J, 288),
+        Walkway(Place.M401, Place.PAPA_FRANCISCO, 140),
+        Walkway(Place.M401, Place.INNOVAMATER, 250),
+        Walkway(Place.BIBLIOTECA, Place.CONSULTORIO, 305),
+        Walkway(Place.BIBLIOTECA, Place.BLOQUE_J, 80),
+        Walkway(Place.BIBLIOTECA, Place.PAPA_FRANCISCO, 150),
+        Walkway(Place.BIBLIOTECA, Place.INNOVAMATER, 175),
+        Walkway(Place.CONSULTORIO, Place.BLOQUE_J, 307),
+        Walkway(Place.CONSULTORIO, Place.PAPA_FRANCISCO, 365),
+        Walkway(Place.CONSULTORIO, Place.INNOVAMATER, 172),
+        Walkway(Place.BLOQUE_J, Place.PAPA_FRANCISCO, 284),
+        Walkway(Place.BLOQUE_J, Place.INNOVAMATER, 160),
+        Walkway(Place.PAPA_FRANCISCO, Place.INNOVAMATER, 260),
     )
 
     // PLACEHOLDERS: replace with the real waypoint and the extra distance it adds.

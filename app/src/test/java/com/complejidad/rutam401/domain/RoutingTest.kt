@@ -33,10 +33,17 @@ class RoutingTest {
 
     @Test
     fun dijkstraFindsPathsThroughOtherPlaces() {
-        assertEquals(290, distance(Place.M401, Place.PAPA_FRANCISCO))
-        assertEquals(220, distance(Place.M401, Place.INNOVAMATER))
-        assertEquals(230, distance(Place.M401, Place.CONSULTORIO))
-        assertEquals(320, distance(Place.BLOQUE_J, Place.PAPA_FRANCISCO))
+        // Direct edge 441 m, but M401 -> Innovamater -> Consultorio is 250 + 172.
+        assertEquals(422, distance(Place.M401, Place.CONSULTORIO))
+        // Direct edge 284 m, but Bloque J -> Biblioteca -> Papa Francisco is 80 + 150.
+        assertEquals(230, distance(Place.BLOQUE_J, Place.PAPA_FRANCISCO))
+        assertEquals(140, distance(Place.M401, Place.PAPA_FRANCISCO))
+        assertEquals(250, distance(Place.M401, Place.INNOVAMATER))
+    }
+
+    @Test
+    fun optimalRouteIs1099Meters() {
+        assertEquals(1099, engine.optimalMeters)
     }
 
     @Test
