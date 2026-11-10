@@ -170,12 +170,16 @@ private fun HomeScreen(viewModel: GameViewModel) {
             fontWeight = FontWeight.Medium,
         )
         Text(
-            "Si aciertas, sigues por la ruta más corta. Si fallas, tomas un camino más largo. " +
-                "Tienes un solo intento por pregunta y siempre terminarás de vuelta en M401.",
+            "La primera pregunta te espera aquí en M401. Tienes un solo intento por pregunta " +
+                "y siempre terminarás de vuelta en M401.",
             color = AppColors.PrimaryMuted,
             fontSize = 16.sp,
             lineHeight = 24.sp,
         )
+        Text("Lugares del recorrido", color = AppColors.OnPrimary, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+        viewModel.homeOrder.forEach { place ->
+            Text("• ${place.displayName}", color = AppColors.OnPrimary, fontSize = 15.sp)
+        }
         Spacer(Modifier.height(24.dp))
         PrimaryButton(
             text = "Empezar en M401",
@@ -205,10 +209,6 @@ private fun TravelScreen(viewModel: GameViewModel, nfcStatus: NfcStatus, onOpenN
             Text(stringResource(R.string.app_name), modifier = Modifier.weight(1f), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = AppColors.Text)
             Spacer(Modifier.width(12.dp))
             Text("${state.visited.size} de ${CampusData.checkpoints.size} puntos", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = AppColors.TextMuted)
-        }
-
-        if (state.penaltyMeters > 0) {
-            WarningBox("Ruta larga: +${state.penaltyMeters} m por tu última respuesta.")
         }
 
         Column(
@@ -283,7 +283,7 @@ private fun TravelScreen(viewModel: GameViewModel, nfcStatus: NfcStatus, onOpenN
 @Composable
 private fun RouteProgress(state: GameState) {
     val isReturning = state.target == CampusData.home
-    val pending = CampusData.checkpoints.filter { it != state.target && it !in state.visited }
+    val pending = state.placeOrder.filter { it != state.target && it !in state.visited }
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         ProgressRow(CampusData.home.displayName, ProgressStatus.DONE)
@@ -337,7 +337,7 @@ private fun QuestionScreen(viewModel: GameViewModel) {
     ScreenColumn {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(state.target.displayName, modifier = Modifier.weight(1f), fontSize = 14.sp, fontWeight = FontWeight.Bold, color = AppColors.Text)
-            Text("Pregunta ${state.visited.size + 1} de ${CampusData.checkpoints.size}", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = AppColors.TextMuted)
+            Text("Pregunta ${viewModel.questionNumber} de ${viewModel.questionCount}", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = AppColors.TextMuted)
         }
         Text(question.text, color = AppColors.Text, fontSize = 28.sp, lineHeight = 34.sp, fontWeight = FontWeight.Bold)
         Text("Tienes un solo intento.", color = AppColors.TextMuted, fontSize = 15.sp)
@@ -371,43 +371,18 @@ private fun QuestionScreen(viewModel: GameViewModel) {
 @Composable
 private fun ResultScreen(viewModel: GameViewModel) {
     val state = viewModel.state
-    val correct = state.lastAnswerCorrect
-    val answered = CampusData.questions.getValue(state.visited.last())
 
-    ScreenColumn(background = if (correct) AppColors.Correct else AppColors.Wrong) {
+    // Same screen for every answer: it never says whether the answer was right or the route is the best.
+    ScreenColumn(background = AppColors.Primary) {
         Spacer(Modifier.height(32.dp))
-        Box(
-            modifier = Modifier
-                .size(72.dp)
-                .clip(CircleShape)
-                .background(AppColors.OnPrimary),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                if (correct) "✓" else "✕",
-                color = if (correct) AppColors.Correct else AppColors.Wrong,
-                fontSize = 36.sp,
-                fontWeight = FontWeight.Bold,
-            )
-        }
         Text(
-            if (correct) "¡Correcto!" else "Respuesta incorrecta",
+            "Respuesta registrada",
             color = AppColors.OnPrimary,
             fontSize = 40.sp,
             lineHeight = 44.sp,
             fontWeight = FontWeight.Bold,
         )
-        if (correct) {
-            Text("Sigues por la ruta más corta.", color = AppColors.OnPrimary, fontSize = 18.sp)
-        } else {
-            Text("La respuesta era: ${answered.options[answered.correctIndex]}", color = AppColors.OnPrimary, fontSize = 18.sp, lineHeight = 26.sp)
-            Text(
-                if (state.penaltyMeters > 0) "Ruta recalculada: +${state.penaltyMeters} m." else "Ya no hay una ruta más larga disponible desde aquí.",
-                color = AppColors.OnPrimary,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-            )
-        }
+        Text("Tu siguiente destino ya está listo.", color = AppColors.PrimaryMuted, fontSize = 18.sp)
         Spacer(Modifier.height(16.dp))
         Column(
             modifier = Modifier
@@ -440,7 +415,7 @@ private fun FinishScreen(viewModel: GameViewModel) {
         Text("Recorrido completo", color = AppColors.OnPrimary, fontSize = 40.sp, lineHeight = 44.sp, fontWeight = FontWeight.Bold)
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            StatCard("${state.correctCount}/${CampusData.checkpoints.size}", "Aciertos", Modifier.weight(1f))
+            StatCard("${state.correctCount}/${viewModel.questionCount}", "Aciertos", Modifier.weight(1f))
             StatCard(formatDuration(state.finishedAtMillis - state.startedAtMillis), "Tiempo", Modifier.weight(1f))
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {

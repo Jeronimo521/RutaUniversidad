@@ -18,14 +18,19 @@ data class GameState(
     val lastAnswerCorrect: Boolean = true,
     val startedAtMillis: Long = 0,
     val finishedAtMillis: Long = 0,
+    /** Order in which the checkpoints are listed on screen; random so it never hints the best route. */
+    val placeOrder: List<Place> = CampusData.checkpoints,
 )
 
 /**
  * Game rules as pure state transitions.
  *
- * Termination: each accepted answer adds one new checkpoint to `visited`, and only the current
- * target can be answered. After [checkpoints].size answers none remain, so the target becomes
- * home and the only move left is [arrive].
+ * The route starts with a question at home, whose answer chooses the first checkpoint.
+ *
+ * Termination: the home question is answered once and leaves the checkpoints untouched. After
+ * that, each accepted answer adds one new checkpoint to `visited`, and only the current target can
+ * be answered. After [checkpoints].size more answers none remain, so the target becomes home and
+ * the only move left is [arrive].
  */
 class GameEngine(
     private val route: RouteEngine,
@@ -34,15 +39,20 @@ class GameEngine(
 ) {
     val optimalMeters: Int get() = route.optimalRemaining(home, checkpoints.toSet())
 
-    fun start(nowMillis: Long): GameState {
-        val first = route.decide(home, checkpoints.toSet(), correct = true)
-        return GameState(
-            phase = Phase.TRAVEL,
-            target = first.target,
-            legMeters = first.legMeters,
+    /** Number of questions in a full route: one at home plus one per checkpoint. */
+    val questionCount: Int get() = checkpoints.size + 1
+
+    /** 1-based number of the question being asked in [state]. */
+    fun questionNumber(state: GameState): Int =
+        if (state.target == home) 1 else state.visited.size + 2
+
+    fun start(nowMillis: Long, placeOrder: List<Place> = checkpoints): GameState =
+        GameState(
+            phase = Phase.QUESTION,
+            target = home,
             startedAtMillis = nowMillis,
+            placeOrder = placeOrder,
         )
-    }
 
     fun onTagScanned(state: GameState, place: Place?): ScanOutcome {
         if (state.phase != Phase.TRAVEL) return ScanOutcome(state, ScanResult.IGNORED)
@@ -56,7 +66,8 @@ class GameEngine(
 
     fun answer(state: GameState, correct: Boolean): GameState {
         if (state.phase != Phase.QUESTION) return state
-        val visited = state.visited + state.target
+        // The home question is asked before leaving, so home never counts as a visited checkpoint.
+        val visited = if (state.target == home) state.visited else state.visited + state.target
         val next = route.decide(state.target, checkpoints.toSet() - visited.toSet(), correct)
         return state.copy(
             phase = Phase.RESULT,

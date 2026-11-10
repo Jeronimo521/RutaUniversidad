@@ -1,8 +1,12 @@
 # Ruta Universidad Católica de Oriente
 
 Android NFC scavenger hunt for the Complejidad Algorítmica final workshop. Players visit five
-campus checkpoints, starting and ending at M401. Correct answers keep them on the shortest route;
-wrong answers add distance.
+campus checkpoints, starting and ending at M401. The first question is asked at M401, then one at
+each checkpoint. Correct answers keep them on the shortest route; wrong answers add distance.
+
+The app never tells players whether an answer was right or whether they are on the best route,
+and it lists the places in a random order, so the order never hints the optimal route. Results
+are shown only at the end.
 
 ## Build
 

@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import com.complejidad.rutam401.data.GameRepository
+import com.complejidad.rutam401.domain.CampusData
 import com.complejidad.rutam401.domain.GameEngine
 import com.complejidad.rutam401.domain.GameState
 import com.complejidad.rutam401.domain.Place
@@ -26,11 +27,20 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     var tags by mutableStateOf(repository.loadTags())
         private set
 
+    /** Checkpoints in a random order for the start screen, so the list never hints the best route. */
+    var homeOrder by mutableStateOf(CampusData.checkpoints.shuffled())
+        private set
+
     val optimalMeters: Int get() = engine.optimalMeters
+    val questionCount: Int get() = engine.questionCount
+    val questionNumber: Int get() = engine.questionNumber(state)
 
-    fun start() = update(engine.start(System.currentTimeMillis()))
+    fun start() = update(engine.start(System.currentTimeMillis(), homeOrder))
 
-    fun restart() = update(GameState())
+    fun restart() {
+        homeOrder = CampusData.checkpoints.shuffled()
+        update(GameState())
+    }
 
     fun answer(correct: Boolean) = update(engine.answer(state, correct))
 

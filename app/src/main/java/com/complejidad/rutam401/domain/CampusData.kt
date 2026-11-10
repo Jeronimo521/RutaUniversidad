@@ -49,7 +49,13 @@ object CampusData {
     )
 
     // DRAFT: replace with the final questions.
+    // M401's question is asked at the start and its answer chooses the first checkpoint.
     val questions = mapOf(
+        Place.M401 to Question(
+            "¿Qué estructura representa los lugares del campus y los caminos que los conectan?",
+            listOf("Una pila", "Una cola", "Un grafo con pesos", "Un arreglo ordenado"),
+            2,
+        ),
         Place.BIBLIOTECA to Question(
             "¿Qué servicio es propio de una biblioteca universitaria?",
             listOf("Venta de matrículas", "Préstamo de libros", "Atención médica", "Registro de notas"),

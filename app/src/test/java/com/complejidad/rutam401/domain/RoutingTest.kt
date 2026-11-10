@@ -10,19 +10,28 @@ class RoutingTest {
 
     private fun distance(from: Place, to: Place) = distances[from.ordinal][to.ordinal]
 
-    /** Plays a whole route, scanning each target correctly, with one answer per checkpoint. */
+    /** The question to answer next: already open at home, or opened by scanning the target's tag. */
+    private fun openQuestion(state: GameState): GameState {
+        if (state.phase == Phase.QUESTION) return state
+        val scan = engine.onTagScanned(state, state.target)
+        assertEquals(ScanResult.ACCEPTED, scan.result)
+        return scan.state
+    }
+
+    /** Plays a whole route: one answer at M401, then one per checkpoint. */
     private fun play(answers: List<Boolean>): GameState {
         var state = engine.start(nowMillis = 0)
         answers.forEach { correct ->
-            val scan = engine.onTagScanned(state, state.target)
-            assertEquals(ScanResult.ACCEPTED, scan.result)
-            state = engine.continueRoute(engine.answer(scan.state, correct))
+            state = engine.continueRoute(engine.answer(openQuestion(state), correct))
         }
         return engine.arrive(state, nowMillis = 1000)
     }
 
+    /** The traveling state right after answering the M401 question correctly. */
+    private fun firstLeg(): GameState = engine.continueRoute(engine.answer(engine.start(nowMillis = 0), true))
+
     private fun allAnswerSequences(): List<List<Boolean>> =
-        (0 until 32).map { bits -> List(5) { position -> bits shr position and 1 == 1 } }
+        (0 until 64).map { bits -> List(6) { position -> bits shr position and 1 == 1 } }
 
     private fun permutations(items: List<Place>): List<List<Place>> =
         if (items.isEmpty()) {
@@ -62,7 +71,7 @@ class RoutingTest {
 
     @Test
     fun allCorrectAnswersWalkTheOptimalRoute() {
-        val finished = play(List(5) { true })
+        val finished = play(List(6) { true })
         assertEquals(engine.optimalMeters, finished.walkedMeters)
         assertEquals(0, finished.totalPenaltyMeters)
     }
@@ -95,12 +104,13 @@ class RoutingTest {
         allAnswerSequences().forEach { answers ->
             var state = engine.start(nowMillis = 0)
             answers.forEach { correct ->
-                val answered = engine.answer(engine.onTagScanned(state, state.target).state, correct)
+                val question = openQuestion(state)
+                val current = question.target
+                val answered = engine.answer(question, correct)
                 val remaining = CampusData.checkpoints - answered.visited.toSet()
                 if (remaining.isNotEmpty()) {
                     // Cost of finishing the route if the next stop is `first`, best order afterwards.
                     val costByFirst = remaining.associateWith { first ->
-                        val current = state.target
                         distance(current, first) +
                             permutations(remaining - first).minOf { walk(first, it) }
                     }
@@ -122,7 +132,7 @@ class RoutingTest {
         allAnswerSequences().forEach { answers ->
             var state = engine.start(nowMillis = 0)
             answers.forEach { correct ->
-                state = engine.answer(engine.onTagScanned(state, state.target).state, correct)
+                state = engine.answer(openQuestion(state), correct)
                 assertTrue(state.penaltyMeters >= 0)
                 if (correct) assertEquals(0, state.penaltyMeters)
                 state = engine.continueRoute(state)
@@ -131,8 +141,31 @@ class RoutingTest {
     }
 
     @Test
+    fun theRouteStartsWithAQuestionAtM401() {
+        val start = engine.start(nowMillis = 0)
+        assertEquals(Phase.QUESTION, start.phase)
+        assertEquals(Place.M401, start.target)
+        assertEquals(1, engine.questionNumber(start))
+        assertEquals(6, engine.questionCount)
+        // Scanning a tag cannot skip the M401 question.
+        assertEquals(ScanResult.IGNORED, engine.onTagScanned(start, Place.BIBLIOTECA).result)
+
+        val right = engine.answer(start, correct = true)
+        val wrong = engine.answer(start, correct = false)
+        assertTrue(right.visited.isEmpty())
+        assertEquals(Place.PAPA_FRANCISCO, right.target)
+        assertTrue(wrong.penaltyMeters > 0)
+    }
+
+    @Test
+    fun theStartOrderIsKeptInTheState() {
+        val order = CampusData.checkpoints.reversed()
+        assertEquals(order, engine.start(nowMillis = 0, placeOrder = order).placeOrder)
+    }
+
+    @Test
     fun wrongTagsDoNotAdvanceTheRoute() {
-        val state = engine.start(nowMillis = 0)
+        val state = firstLeg()
         val other = CampusData.checkpoints.first { it != state.target }
 
         assertEquals(ScanResult.NOT_NEXT, engine.onTagScanned(state, other).result)
@@ -146,7 +179,11 @@ class RoutingTest {
     @Test
     fun aQuestionCanOnlyBeAnsweredOnce() {
         val start = engine.start(nowMillis = 0)
-        val question = engine.onTagScanned(start, start.target).state
+        val wrongAtHome = engine.answer(start, correct = false)
+        assertEquals(wrongAtHome, engine.answer(wrongAtHome, correct = true))
+
+        val leg = firstLeg()
+        val question = engine.onTagScanned(leg, leg.target).state
         val wrong = engine.answer(question, correct = false)
         assertEquals(wrong, engine.answer(wrong, correct = true))
     }
@@ -155,5 +192,7 @@ class RoutingTest {
     fun cannotFinishBeforeVisitingEveryCheckpoint() {
         val start = engine.start(nowMillis = 0)
         assertEquals(start, engine.arrive(start, nowMillis = 1000))
+        val leg = firstLeg()
+        assertEquals(leg, engine.arrive(leg, nowMillis = 1000))
     }
 }

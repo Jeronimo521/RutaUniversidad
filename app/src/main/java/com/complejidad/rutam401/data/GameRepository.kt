@@ -54,11 +54,16 @@ class GameRepository(context: Context) {
         put("lastAnswerCorrect", state.lastAnswerCorrect)
         put("startedAtMillis", state.startedAtMillis)
         put("finishedAtMillis", state.finishedAtMillis)
+        put("placeOrder", JSONArray(state.placeOrder.map { it.name }))
     }
 
     private fun decode(json: JSONObject): GameState {
         val visited = json.getJSONArray("visited")
+        // Progress saved by older versions has no order; fall back to the default one.
+        val order = json.optJSONArray("placeOrder")
+        val placeOrder = order?.let { array -> List(array.length()) { Place.valueOf(array.getString(it)) } }
         return GameState(
+            placeOrder = placeOrder ?: GameState().placeOrder,
             phase = Phase.valueOf(json.getString("phase")),
             target = Place.valueOf(json.getString("target")),
             legMeters = json.getInt("legMeters"),
